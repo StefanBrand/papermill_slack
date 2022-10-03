@@ -60,7 +60,7 @@ jobs:
         python -m pip install . ipykernel
     - name: Test usage as engine
       run: |
-        papermill --engine slack_engine $NOTEBOOK_PATH
+        papermill --engine slack_engine $NOTEBOOK_PATH /tmp/$NOTEBOOK_PATH
     - name: Test usage as CLI tool
       run: |
         papermill_slack $NOTEBOOK_PATH
