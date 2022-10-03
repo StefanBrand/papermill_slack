@@ -35,5 +35,5 @@ jobs:
       run: |
         flake8
     - name: Type checking with mypy
-      run: /
+      run: |
         mypy .
