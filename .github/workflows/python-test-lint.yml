@@ -10,7 +10,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  unit-test-and-lint:
 
     runs-on: ubuntu-latest
     strategy:
@@ -37,3 +37,33 @@ jobs:
     - name: Type checking with mypy
       run: |
         mypy .
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    env:
+      PAPERMILL_SLACK_WEBHOOK_URL: https://httpbin.org/status/200
+      NOTEBOOK_PATH: tests/test_data/out_parametrized.ipynb
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10"]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install . ipykernel
+    - name: Test usage as engine
+      run: |
+        papermill --engine slack_engine $NOTEBOOK_PATH
+    - name: Test usage as CLI tool
+      run: |
+        papermill_slack $NOTEBOOK_PATH
+    - name: Test usage piping stdout to stdin
+      run: |
+        papermill $NOTEBOOK_PATH - | papermill_slack -
